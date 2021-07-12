@@ -1,52 +1,61 @@
+{% set version = "2.14.6" %}
+{% set sha256 = "5cf0fb1f40591225e3aa8e4d2b804513f580e35f450e0699824b03386e4bc23c" %}
+
 package:
   name: ariba
-  version: "2.5.1"
+  version: {{ version }}
 
 source:
-  fn: ariba-2.5.1.tar.gz
-  url: https://pypi.python.org/packages/51/e9/e213fea61cb4630861e1dece3b77b7aafbae212c18b72ce68aa19b7e4aea/ariba-2.5.1.tar.gz
-  md5: 7b243610ff2d8e83f220fb32eab1b83b
+  url: https://pypi.io/packages/source/a/ariba/ariba-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
 
 build:
-  skip: True # [py27]
-  # number: 1
+  number: 1
+  # Skipping py>=38 on osx because the bowtie2 <2.4.0 recipes are currently skipped on osx.
+  skip: True  # [py<30 or (py>=38 and osx)]
+  script: python -m pip install --no-deps --ignore-installed .
 
 requirements:
   build:
+    - {{ compiler("c") }}
+    - {{ compiler("cxx") }}
+  host:
     - python
-    - setuptools
-    - dendropy >=4.1.0
-    - pyfastaq >=3.12.0
-    - pysam >=0.9.1
-    - pymummer >=0.10.1
-    - gcc  # [not osx]
-    - llvm  # [osx]
-    - zlib
-
+    - pip
   run:
     - python
-    - dendropy >=4.1.0
+    - beautifulsoup4 >=4.1.0
+    - dendropy >=4.2.0
+    - matplotlib-base >=3.1.0
+    - biopython
     - pyfastaq >=3.12.0
-    - pysam >=0.9.1
-    - pymummer >=0.10.1
-    - bowtie2 >=2.1.0
-    - cd-hit >=4.6
+    # older pysam versions have wrong openssl pinning
+    - pysam >=0.15.3
+    - pymummer <=0.10.3
+    - bowtie2 <2.4.0 
+    - cd-hit >=4.6.5
     - samtools >=1.2
     - bcftools >=1.2
     - mummer >=3.23
     - spades >=3.5.0
-    - libgcc  # [not osx]
     - zlib
+    - wget
 
 test:
   imports:
     - ariba
     - ariba.tasks
-
-  requires:
-    - nose >=1.3
+  commands:
+    - "ariba version"
 
 about:
   home: https://github.com/sanger-pathogens/ariba
-  license: GNU General Public License v3 (GPLv3)
+  license: GNU General Public License v3 (GPL-3.0)
+  license_family: GPL
+  license_file: LICENSE
   summary: 'ARIBA: Antibiotic Resistance Identification By Assembly'
+
+extra:
+  container:
+    # matplotlib depends on libGL.so.1 from the system
+    extended-base: true
