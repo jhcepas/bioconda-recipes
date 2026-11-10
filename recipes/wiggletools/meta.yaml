@@ -1,35 +1,46 @@
-{% set WIGGLETOOLS_VERSION = "1.2.1" %}
-{% set WIGGLETOOLS_SHA256 = "906d32e281fe234b3eacbe569c21e68d61aca3d0ef2eec501e4efd61799be4ee" %}
+{% set name = "WiggleTools" %}
+{% set version = "1.2.11" %}
+{% set sha256 = "ba239c55d017c5d7fd7e11ebf827a1caf3e504bf61bdcd511cd9342da0e94005" %}
 
 package:
-  name: wiggletools
-  version: {{ WIGGLETOOLS_VERSION }}
-
-build:
-  number: 0
+  name: {{ name|lower }}
+  version: {{ version }}
 
 source:
-  fn: wiggletools-{{ WIGGLETOOLS_VERSION }}.tar.gz
-  url: https://github.com/Ensembl/WiggleTools/archive/v{{ WIGGLETOOLS_VERSION }}.tar.gz
-  sha256: {{ WIGGLETOOLS_SHA256 }}
+  url: https://github.com/Ensembl/WiggleTools/archive/v{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: 10
+  run_exports:
+    - {{ pin_subpackage(name|lower, max_pin="x") }}
 
 requirements:
   build:
+    - make
+    - {{ compiler('c') }}
+  host:
     - libbigwig
     - htslib
     - gsl
-  run:
-    - libbigwig
-    - htslib
-    - gsl
-    #
+    - libcblas
 
-about:
-  home: https://github.com/Ensembl/WiggleTools
-  license: Apache
-  summary: The WiggleTools package allows genomewide data files to be manipulated as numerical functions,
-           equipped with all the standard functional analysis operators (sum, product, product by a scalar, comparators),
-           and derived statistics (mean, median, variance, stddev, t-test, Wilcoxon's rank sum test, etc).
 test:
   commands:
     - wiggletools --help
+
+about:
+  home: "https://github.com/Ensembl/WiggleTools"
+  license: "Apache-2.0"
+  license_family: APACHE
+  license_file: LICENSE
+  summary: The WiggleTools package allows genomewide data files to be manipulated as numerical functions,
+           equipped with all the standard functional analysis operators (sum, product, product by a scalar, comparators),
+           and derived statistics (mean, median, variance, stddev, t-test, Wilcoxon's rank sum test, etc).
+  dev_url: "https://github.com/Ensembl/WiggleTools"
+  doc_url: "https://github.com/Ensembl/WiggleTools/blob/v{{ version }}/README.md"
+
+extra:
+  additional-platforms:
+    - linux-aarch64
+    - osx-arm64

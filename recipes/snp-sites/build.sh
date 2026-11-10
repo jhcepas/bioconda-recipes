@@ -1,24 +1,17 @@
 #!/bin/bash
-# fix automake
-sed -i.bak '1 s|^.*$|#!/usr/bin/env perl|g' $PREFIX/bin/aclocal
-sed -i.bak '1 s|^.*$|#!/usr/bin/env perl|g' $PREFIX/bin/automake
+set -xe
 
-# fix autoconf
-sed -i.bak '1 s|^.*$|#!/usr/bin/env perl|g' $PREFIX/bin/autom4te
-sed -i.bak '1 s|^.*$|#!/usr/bin/env perl|g' $PREFIX/bin/autoheader
-sed -i.bak '1 s|^.*$|#!/usr/bin/env perl|g' $PREFIX/bin/autoreconf
-sed -i.bak '1 s|^.*$|#!/usr/bin/env perl|g' $PREFIX/bin/ifnames
-sed -i.bak '1 s|^.*$|#!/usr/bin/env perl|g' $PREFIX/bin/autoscan
-sed -i.bak '1 s|^.*$|#!/usr/bin/env perl|g' $PREFIX/bin/autoupdate
+export CFLAGS="${CFLAGS} -O3 -I$PREFIX/include"
+export LDFLAGS="${LDFLAGS} -L$PREFIX/lib"
+export CPATH="${PREFIX}/include"
 
+mkdir -p "$PREFIX/bin"
 
-export CFLAGS="-I$PREFIX/include"
-export LDFLAGS="-L$PREFIX/lib"
-export CPATH=${PREFIX}/include
+cp -f ${BUILD_PREFIX}/share/gnuconfig/config.* .
+cp -f ${BUILD_PREFIX}/share/gnuconfig/config.* m4/
 
-mkdir -p $PREFIX/bin
+autoreconf -if
+./configure --prefix="$PREFIX"
 
-autoreconf -i -f
-./configure --prefix=$PREFIX 
-make
+make -j"${CPU_COUNT}"
 make install
